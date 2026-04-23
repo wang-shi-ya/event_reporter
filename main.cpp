@@ -36,9 +36,9 @@ struct Event {
         // 获取当前时间并格式化为字符串
         time_t t = chrono::system_clock::to_time_t(chrono::system_clock::now());
         char buf[100];
-        ctime_s(buf, sizeof(buf), &t);  // 安全的时间格式化函数
+        ctime_s(buf, sizeof(buf), &t);  
         timestamp = buf;
-        timestamp.pop_back();  // 移除末尾的换行符
+        timestamp.pop_back();  
     }
 };
 
@@ -206,8 +206,8 @@ private:
      * 在工作线程中运行
      */
     void processPipe() {
-        char buffer[1024] = { 0 };  // 缓冲区，初始化为0
-        DWORD bytesRead = 0;  // 读取的字节数
+        char buffer[1024] = { 0 }; 
+        DWORD bytesRead = 0; 
 
         while (running) {
             // 创建命名管道
@@ -219,7 +219,7 @@ private:
                 1024, 1024, 0, NULL);  // 缓冲区大小和默认超时
 
             if (hPipe == INVALID_HANDLE_VALUE) {  // 创建失败
-                Sleep(100);  // 短暂休眠后重试
+                Sleep(100);  
                 continue;
             }
 
@@ -230,11 +230,11 @@ private:
                 memset(buffer, 0, sizeof(buffer));
                 if (ReadFile(hPipe, buffer, sizeof(buffer) - 1, &bytesRead, NULL) && bytesRead > 0) {
                     string msg(buffer);
-                    if (msg.find("PROGRAM:") == 0) {  // 握手消息
-                        currentClient = msg.substr(8);  // 提取程序名称
+                    if (msg.find("PROGRAM:") == 0) { 
+                        currentClient = msg.substr(8);  
                         cout << "[系统] 当前连接: " << currentClient << endl;
                         // 发送确认消息
-                        string ack = "ACK:Connected";
+                        string ack = "连接:Connected";
                         DWORD written = 0;
                         WriteFile(hPipe, ack.c_str(), (DWORD)ack.length(), &written, NULL);
                     }
@@ -249,10 +249,10 @@ private:
                         size_t ep = msg.find("\"event\":\"");
                         size_t dp = msg.find("\"data\":\"");
                         if (ep != string::npos && dp != string::npos) {
-                            ep += 9;  // 跳过"event":""
-                            dp += 8;   // 跳过"data":""
-                            string en = msg.substr(ep, msg.find("\"", ep) - ep);  // 提取事件名称
-                            string ed = msg.substr(dp, msg.find("\"", dp) - dp);  // 提取事件数据
+                            ep += 9;
+                            dp += 8; 
+                            string en = msg.substr(ep, msg.find("\"", ep) - ep); 
+                            string ed = msg.substr(dp, msg.find("\"", dp) - dp); 
                             es->reportEvent(en, ed, currentClient);  // 上报事件
                         }
                     }
@@ -312,7 +312,7 @@ int main() {
     cout << "========================================" << endl << endl;
     cout << "[状态] 系统就绪，管道: EventPipe" << endl << endl;
 
-    // 初始化事件系统
+    
     EventSystem eventSystem;
     // 注册发送器：控制台和分类文件
     eventSystem.registerSender(make_unique<ConsoleSender>());
@@ -324,7 +324,7 @@ int main() {
     // 主循环：监控客户端连接变化
     string lastClient = "";
     while (true) {
-        Sleep(1000);  // 每秒钟检查一次
+        Sleep(1000);
         string client = pipeServer.getClient();
         if (client != lastClient && client != "none") {
             lastClient = client;
