@@ -1,5 +1,5 @@
 ﻿#define _CRT_SECURE_NO_WARNINGS
-// 包含必要的头文件
+
 #include <iostream>
 #include <windows.h>
 #include <thread>
@@ -14,13 +14,6 @@
 #include <ctime>
 using namespace std;
 
-/**
- * 设置控制台编码为GBK，确保中文显示正常
- */
-void SetConsoleGBK() {
-    SetConsoleOutputCP(936);  // 设置输出编码为GBK
-    SetConsoleCP(936);        // 设置输入编码为GBK
-}
 
 /**
  * 事件数据结构
@@ -219,7 +212,7 @@ private:
         while (running) {
             // 创建命名管道
             hPipe = CreateNamedPipeA(
-                "\\\.\\pipe\\EventPipe",  // 管道名称
+                "\\\\.\\pipe\\EventPipe",  // 管道名称
                 PIPE_ACCESS_DUPLEX,  // 双向访问
                 PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT,  // 消息模式
                 PIPE_UNLIMITED_INSTANCES,  // 无限实例
@@ -256,7 +249,7 @@ private:
                         size_t ep = msg.find("\"event\":\"");
                         size_t dp = msg.find("\"data\":\"");
                         if (ep != string::npos && dp != string::npos) {
-                            ep += 10;  // 跳过"event":""
+                            ep += 9;  // 跳过"event":""
                             dp += 8;   // 跳过"data":""
                             string en = msg.substr(ep, msg.find("\"", ep) - ep);  // 提取事件名称
                             string ed = msg.substr(dp, msg.find("\"", dp) - dp);  // 提取事件数据
@@ -265,6 +258,7 @@ private:
                     }
                     else {
                         cout << "[系统] 客户端 " << currentClient << " 已断开" << endl;
+                        cout << "----------------------------------------" << endl;
                         break;
                     }
                 }
@@ -306,9 +300,9 @@ public:
  * 主函数
  * 程序入口
  */
+
 int main() {
-    // 设置控制台编码和窗口
-    SetConsoleGBK();
+
     SetConsoleTitleA("事件监控系统");
     MoveWindow(GetConsoleWindow(), 100, 100, 1000, 700, TRUE);
 
@@ -334,10 +328,9 @@ int main() {
         string client = pipeServer.getClient();
         if (client != lastClient && client != "none") {
             lastClient = client;
-            cout << endl << "[切换] 当前程序: " << client << endl;
             cout << "----------------------------------------" << endl;
         }
     }
-
+    
     return 0;
 }
